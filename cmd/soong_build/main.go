@@ -22,6 +22,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"runtime/debug"
 	"strings"
 	"time"
 
@@ -314,6 +315,12 @@ func parseAvailableEnv() map[string]string {
 }
 
 func main() {
+	// Keep Soong below this host's physical-memory limit. Without a soft Go
+	// heap limit, analysis of the full RisingOS graph exhausts RAM and swap.
+	runtime.GOMAXPROCS(4)
+	debug.SetMemoryLimit(14 << 30)
+	debug.SetGCPercent(25)
+
 	flag.Parse()
 
 	if cmdlineArgs.Memprofile == "" {
